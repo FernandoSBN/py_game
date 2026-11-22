@@ -137,7 +137,6 @@ def desenhar_botoes(tela, estado, fonte, selecionado, com_capa=False):
         tela.blit(texto, texto.get_rect(center=area.center))
 
 def desenhar_fechar(tela):
-    """Mantém uma saída visível mesmo com o jogo em tela cheia."""
     ativo = BOTAO_FECHAR.collidepoint(pygame.mouse.get_pos())
     pygame.draw.rect(tela, (174, 63, 90) if ativo else (42, 33, 71),
                      BOTAO_FECHAR, border_radius=10)
@@ -148,7 +147,6 @@ def desenhar_fechar(tela):
 
 
 def desenhar_encontro(tela, comemorando):
-    """Mostra a turma ampliada no menu e a Mônica com o Sansão na vitória."""
     cena = pygame.Surface((144, 120), pygame.SRCALPHA)
     pygame.draw.ellipse(cena, (82, 132, 124), (14, 84, 119, 16))
     if comemorando:
@@ -169,7 +167,6 @@ def desenhar_encontro(tela, comemorando):
 
 
 def carregar_sons():
-    """Carrega os efeitos locais quando o dispositivo de áudio está disponível."""
     if not pygame.mixer.get_init():
         return {}
     sons = {}
@@ -178,3 +175,127 @@ def carregar_sons():
         som.set_volume(0.34)
         sons[nome] = som
     return sons
+
+def main():
+    pygame.init()
+    tela = pygame.display.set_mode((LARGURA, ALTURA), pygame.FULLSCREEN | pygame.SCALED)
+    pygame.display.set_caption("Turma da Mônica: A Grande Perseguição")
+    fontes = (pygame.font.SysFont("georgia", 34, bold=True),
+              pygame.font.SysFont("segoeui", 21), pygame.font.SysFont("segoeui", 17))
+    relogio = pygame.time.Clock()
+    capa = carregar_capa()
+    sons = carregar_sons()
+    musica = pygame.mixer.get_init() is not None
+    if musica:
+        pygame.mixer.music.load(str(PASTA / "assets" / "trilha.wav"))
+        pygame.mixer.music.set_volume(0.30)
+        pygame.mixer.music.play(-1)
+    musica_pausada = False
+    previa = Jogo({})
+    previa.camera = 220
+    jogo = None
+    estado = "menu"
+    selecionado = 0
+    tempo = 0
+    pular = False
+    espera = 0
+
+    while estado != "sair":
+        milissegundos = min(relogio.tick(60), 100)
+        for evento in pygame.event.get():
+            acao = estado
+            if evento.type == pygame.QUIT:
+                acao = "sair"
+            elif evento.type == pygame.WINDOWFOCUSLOST and estado == "partida":
+                acao = "pausa"
+            elif evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_m and musica:
+                    musica_pausada = not musica_pausada
+                    if musica_pausada:
+                        pygame.mixer.music.pause()
+                    else:
+                        pygame.mixer.music.unpause()
+                elif evento.key == pygame.K_ESCAPE:
+                    if estado == "partida":
+                        acao = "pausa"
+                    elif estado == "pausa":
+                        acao = "partida"
+                    elif estado in ("instrucoes", "vitoria", "derrota"):
+                        acao = "menu"
+                elif estado == "partida" and evento.key == pygame.K_SPACE:
+                    pular = True
+                elif estado in MENUS:
+                    opcoes = MENUS[estado]
+                    menu_horizontal = estado == "menu" and capa is not None
+                    if evento.key == pygame.K_UP or (menu_horizontal and evento.key == pygame.K_LEFT):
+                        selecionado = (selecionado - 1) % len(opcoes)
+                    elif evento.key == pygame.K_DOWN or (menu_horizontal and evento.key == pygame.K_RIGHT):
+                        selecionado = (selecionado + 1) % len(opcoes)
+                    elif evento.key == pygame.K_RETURN:
+                        acao = opcoes[selecionado][1]
+            elif evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                if BOTAO_FECHAR.collidepoint(evento.pos):
+                    acao = "sair"
+                else:
+                    for i, area in enumerate(botoes(estado, capa is not None)):
+                        if area.collidepoint(evento.pos):
+                            acao = MENUS[estado][i][1]
+                            break
+
+            if acao != estado:
+                if acao == "menu" and jogo is not None:
+                    previa.recorde = jogo.recorde
+                selecionado = 0
+                tempo = 0
+                pular = False
+                if acao == "nova":
+                    jogo = Jogo(sons)
+                    acao = "partida"
+                estado = acao
+                if estado == "sair":
+                    break
+
+        if estado == "sair":
+            break
+        if estado == "partida":
+            teclas = pygame.key.get_pressed()
+            esquerda = teclas[pygame.K_a] or teclas[pygame.K_LEFT]
+            direita = teclas[pygame.K_d] or teclas[pygame.K_RIGHT]
+            eixo = int(direita) - int(esquerda)
+            # Cada 1000 unidades acumuladas corresponde a um quadro de simulação.
+            tempo += milissegundos * 60
+            while tempo >= 1000 and estado == "partida":
+                estado = jogo.atualizar(eixo, pular)
+                tempo -= 1000
+                pular = False
+                if estado in ("respawn", "transicao"):
+                    espera = 1900 if estado == "transicao" else 825
+        elif estado in ("respawn", "transicao"):
+            espera -= milissegundos
+            if espera <= 0:
+                estado = "partida"
+                tempo = 0
+
+        mundo = previa if estado in ("menu", "instrucoes") else jogo
+        if estado in ("menu", "instrucoes", "vitoria"):
+            if estado != "menu" or capa is None:
+                mundo.desenhar_cenario(tela)
+                desenhar_encontro(tela, estado == "vitoria")
+        else:
+            mundo.desenhar(tela)
+        if estado in ("partida", "transicao", "respawn"):
+            desenhar_hud(tela, jogo, fontes[1])
+            if estado != "partida":
+                pygame.draw.rect(tela, FUNDO, (220, 206, 520, 115), border_radius=16)
+                aviso = jogo.fase["nome"] if estado == "transicao" else jogo.aviso_retorno
+                texto = fontes[0].render(aviso, True, CLARO)
+                tela.blit(texto, texto.get_rect(center=(480, 250 if estado == "transicao" else 263)))
+                if estado == "transicao":
+                    historia = fontes[1].render(jogo.aviso_transicao, True, OURO)
+                    tela.blit(historia, historia.get_rect(center=(480, 285)))
+        else:
+            desenhar_menu(tela, estado, mundo, fontes, selecionado, capa)
+        desenhar_fechar(tela)
+        pygame.display.flip()
+
+    pygame.quit()
