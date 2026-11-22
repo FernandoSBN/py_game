@@ -52,3 +52,15 @@ def carregar_recorde():
         return max(0, int(ARQUIVO_RECORDE.read_text(encoding="utf-8")))
     except (OSError, ValueError):
         return 0
+
+
+        def carregar_fundo(nome):
+   
+    try:
+        imagem = pygame.image.load(str(PASTA / "assets" / nome))
+    except (OSError, pygame.error):
+        return None
+
+    largura, altura = imagem.get_size()
+    escala = max((LARGURA + 192) / largura, CHAO / (altura * 0.91))
+    return pygame.transform.smoothscale(imagem, (round(largura * escala), round(altura * escala)))
