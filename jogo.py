@@ -45,3 +45,10 @@ FASES = [
         "poderes": [(700, 325, "escudo"), (2035, 415, "impulso")],
     },
 ]
+
+
+def carregar_recorde():
+    try:
+        return max(0, int(ARQUIVO_RECORDE.read_text(encoding="utf-8")))
+    except (OSError, ValueError):
+        return 0
