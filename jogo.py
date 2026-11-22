@@ -56,6 +56,7 @@ def carregar_recorde():
 
         def carregar_fundo(nome):
    
+def carregar_fundo(nome):
     try:
         imagem = pygame.image.load(str(PASTA / "assets" / nome))
     except (OSError, pygame.error):
