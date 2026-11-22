@@ -62,3 +62,16 @@ def carregar_fundo(nome):
     largura, altura = imagem.get_size()
     escala = max((LARGURA + 192) / largura, CHAO / (altura * 0.91))
     return pygame.transform.smoothscale(imagem, (round(largura * escala), round(altura * escala)))
+
+
+
+def desenhar_estrela(tela, x, y, raio):
+    
+    pontos = []
+    for i in range(10):
+        angulo = i * math.pi / 5 - math.pi / 2
+        tamanho = raio if i % 2 == 0 else raio * 0.48
+        pontos.append((round(x + math.cos(angulo) * tamanho),
+                       round(y + math.sin(angulo) * tamanho)))
+    pygame.draw.polygon(tela, (255, 218, 81), pontos)
+    pygame.draw.polygon(tela, (180, 104, 52), pontos, 1)
