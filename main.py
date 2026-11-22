@@ -135,3 +135,46 @@ def desenhar_botoes(tela, estado, fonte, selecionado, com_capa=False):
             pygame.draw.rect(tela, CLARO if ativo else BORDA, area, 2, border_radius=9)
         texto = fonte.render(MENUS[estado][i][0], True, FUNDO if ativo or principal else CLARO)
         tela.blit(texto, texto.get_rect(center=area.center))
+
+def desenhar_fechar(tela):
+    """Mantém uma saída visível mesmo com o jogo em tela cheia."""
+    ativo = BOTAO_FECHAR.collidepoint(pygame.mouse.get_pos())
+    pygame.draw.rect(tela, (174, 63, 90) if ativo else (42, 33, 71),
+                     BOTAO_FECHAR, border_radius=10)
+    pygame.draw.rect(tela, CLARO if ativo else BORDA, BOTAO_FECHAR, 1, border_radius=10)
+    x, y = BOTAO_FECHAR.center
+    pygame.draw.line(tela, CLARO, (x - 5, y - 5), (x + 5, y + 5), 2)
+    pygame.draw.line(tela, CLARO, (x + 5, y - 5), (x - 5, y + 5), 2)
+
+
+def desenhar_encontro(tela, comemorando):
+    """Mostra a turma ampliada no menu e a Mônica com o Sansão na vitória."""
+    cena = pygame.Surface((144, 120), pygame.SRCALPHA)
+    pygame.draw.ellipse(cena, (82, 132, 124), (14, 84, 119, 16))
+    if comemorando:
+        quadro = pygame.time.get_ticks() // 90
+        altura = (0, 4, 8, 12, 8, 4)[quadro % 6]
+        desenhar_turma(cena, 54, 51 - altura, "monica", passo=altura // 4)
+        desenhar_sansao(cena, 71, 61 - altura)
+        for i in range(6):
+            desenhar_estrela(cena, 20 + i * 20, 17 + (quadro + i * 9) % 28, 4 + i % 3)
+    else:
+        desenhar_turma(cena, 14, 50, "cebolinha", passo=3)
+        desenhar_turma(cena, 73, 48, "monica", passo=-3)
+        desenhar_sansao(cena, 90, 59)
+        desenhar_turma(cena, 109, 52, "cascao", -1)
+        for x, y in ((36, 28), (65, 14), (106, 28)):
+            desenhar_estrela(cena, x, y, 5)
+    tela.blit(pygame.transform.scale(cena, (432, 360)), (473, 101))
+
+
+def carregar_sons():
+    """Carrega os efeitos locais quando o dispositivo de áudio está disponível."""
+    if not pygame.mixer.get_init():
+        return {}
+    sons = {}
+    for nome in ("salto", "coleta", "dano"):
+        som = pygame.mixer.Sound(str(PASTA / "assets" / f"{nome}.wav"))
+        som.set_volume(0.34)
+        sons[nome] = som
+    return sons
