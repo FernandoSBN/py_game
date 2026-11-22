@@ -70,4 +70,49 @@ class Personagem:
         desenhar_turma(tela, x, y, "monica", self.direcao, passo)
         desenhar_sansao(tela, x + (19 if self.direcao > 0 else -8), y + 15 + abs(passo) // 2)
 
+def desenhar_sansao(tela, x, y):
+    """Desenha o coelhinho azul que passa de um personagem para o outro."""
+    azul = (71, 165, 237)
+    pygame.draw.ellipse(tela, azul, (x + 1, y, 5, 12))
+    pygame.draw.ellipse(tela, azul, (x + 9, y - 2, 5, 13))
+    pygame.draw.ellipse(tela, azul, (x, y + 7, 16, 14))
+    pygame.draw.ellipse(tela, (166, 219, 255), (x + 4, y + 14, 9, 6))
+    for olho in (4, 11):
+        pygame.draw.circle(tela, (29, 41, 82), (x + olho, y + 12), 1)
+
+def desenhar_turma(tela, x, y, nome, direcao=1, passo=0):
+    """Identifica cada personagem pela roupa e pela silhueta."""
+    contorno = (44, 35, 64)
+    pele = (255, 204, 152)
+    cores = {"monica": (235, 64, 93), "cebolinha": (67, 177, 100), "cascao": (249, 197, 68)}
+    for lado, altura in ((6, passo), (18, -passo)):
+        pygame.draw.ellipse(tela, pele, (x + lado, y + 28, 6, 10 - altura))
+        pygame.draw.ellipse(tela, contorno, (x + lado - 2, y + 34 - altura, 11, 4))
+
+    if nome == "monica":
+        pygame.draw.polygon(tela, cores[nome], [(x + 7, y + 16), (x + 21, y + 16),
+                                                (x + 27, y + 32), (x + 1, y + 32)])
+        pygame.draw.ellipse(tela, contorno, (x + 1, y - 4, 26, 24))
+    else:
+        pygame.draw.rect(tela, cores[nome], (x + 3, y + 16, 23, 14), border_radius=5)
+        calca = (99, 61, 156) if nome == "cascao" else (51, 64, 103)
+        pygame.draw.rect(tela, calca, (x + 5, y + 27, 19, 6), border_radius=2)
+
+    pygame.draw.ellipse(tela, pele, (x + 4 + direcao, y + 1, 21, 18))
+    if nome == "cebolinha":
+        for i in range(5):
+            pygame.draw.line(tela, contorno, (x + 8 + i * 3, y + 3),
+                             (x + 4 + i * 5, y - 5 - i % 2 * 3), 2)
+    elif nome == "cascao":
+        for i in range(5):
+            pygame.draw.circle(tela, contorno, (x + 6 + i * 4, y + i % 2 * 2), 4)
+        pygame.draw.circle(tela, (180, 117, 92), (x + 12, y + 13), 2)
+    else:
+        pygame.draw.arc(tela, contorno, (x + 1, y - 3, 25, 17), 0.2, 3.2, 4)
+    pygame.draw.circle(tela, contorno, (x + 14 + 5 * direcao, y + 9), 2)
+    pygame.draw.ellipse(tela, contorno, (x + 12 + 4 * direcao, y + 12, 6, 4))
+    if nome == "monica":
+        pygame.draw.rect(tela, (255, 250, 233), (x + 12 + 4 * direcao, y + 12, 4, 2))
+
+
 
