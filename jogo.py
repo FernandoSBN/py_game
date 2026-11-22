@@ -52,10 +52,7 @@ def carregar_recorde():
         return max(0, int(ARQUIVO_RECORDE.read_text(encoding="utf-8")))
     except (OSError, ValueError):
         return 0
-
-
-        def carregar_fundo(nome):
-   
+      
 def carregar_fundo(nome):
     try:
         imagem = pygame.image.load(str(PASTA / "assets" / nome))
