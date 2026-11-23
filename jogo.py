@@ -157,3 +157,24 @@ class Jogo:
             bola.x -= 4
             if not any(piso.left <= bola.centerx < piso.right for piso in self.chao):
                 self.bolas.remove(bola)
+
+
+    def coletar_itens(self):
+        monica = self.monica
+        for estrela in self.estrelas[:]:
+            if monica.corpo.colliderect(estrela):
+                self.estrelas.remove(estrela)
+                self.efeitos.append((estrela.center, (255, 209, 70), self.quadro))
+                self.pontuar(10)
+                self.tocar("coleta")
+
+        for item in self.poderes[:]:
+            area, tipo = item
+            if monica.corpo.colliderect(area):
+                self.poderes.remove(item)
+                if tipo == "escudo":
+                    monica.escudo = True
+                else:
+                    monica.impulso = 360
+                self.efeitos.append((area.center, (96, 218, 247), self.quadro))
+                self.tocar("coleta")
