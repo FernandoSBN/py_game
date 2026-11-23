@@ -2,15 +2,15 @@ import pygame
 
 from jogo import ALTURA, LARGURA, PASTA, Jogo, desenhar_estrela
 from personagem import desenhar_sansao, desenhar_turma
-
+#Paleta de cores da interface
 FUNDO = (54, 40, 89)
 BORDA = (135, 102, 147)
 CLARO = (251, 241, 222)
 SUAVE = (204, 199, 226)
 OURO = (255, 202, 113)
 TURQUESA = (138, 235, 215)
-AREA_CAPA = pygame.Rect(344, 85, 584, 368)
-BOTAO_FECHAR = pygame.Rect(905, 18, 37, 37)
+AREA_CAPA = pygame.Rect(344, 85, 584, 368)      #onde a imagem de capa é encaixada
+BOTAO_FECHAR = pygame.Rect(905, 18, 37, 37)     #'x' no canto superior direito
 
 MENUS = {
     "menu": [("Jogar", "nova"), ("Como jogar", "instrucoes"), ("Sair", "sair")],
@@ -19,6 +19,7 @@ MENUS = {
     "derrota": [("Tentar novamente", "nova"), ("Menu inicial", "menu")],
     "vitoria": [("Jogar novamente", "nova"), ("Menu inicial", "menu")],
 }
+# Título exibido em cada painel de menu
 TITULOS = {
     "instrucoes": "Como jogar",
     "pausa": "Partida pausada",
@@ -33,10 +34,12 @@ def escrever(tela, fonte, texto, cor, posicao):
 
 def botoes(estado, com_capa=False):
     opcoes = MENUS.get(estado, [])
+    # Menu principal com capa
     if estado == "menu" and com_capa:
         return [pygame.Rect(38, 305, 270, 58),
                 pygame.Rect(38, 376, 270, 47),
                 pygame.Rect(38, 434, 270, 43)]
+    # Demais menus  
     return [pygame.Rect(63, 462 - len(opcoes) * 51 + i * 51, 367, 44)
             for i in range(len(opcoes))]
 
@@ -47,6 +50,7 @@ def carregar_capa():
     except (OSError, pygame.error):
         return None
     largura, altura = imagem.get_size()
+    # Mantém a proporção
     escala = min((AREA_CAPA.w - 12) / largura, (AREA_CAPA.h - 12) / altura)
     return pygame.transform.smoothscale(imagem, (round(largura * escala), round(altura * escala)))
 
@@ -57,6 +61,7 @@ def desenhar_hud(tela, jogo, fonte):
     escrever(tela, fonte, f"{jogo.indice + 1:02d}  {jogo.fase['nome']}", CLARO, (33, 31))
     escrever(tela, fonte, f"Pontos  {jogo.pontos}", OURO, (366, 31))
     escrever(tela, fonte, f"Vidas  {jogo.monica.vidas}", CLARO, (510, 31))
+    # Poderes ativos
     poderes = []
     if jogo.monica.escudo:
         poderes.append("Proteção")
@@ -76,6 +81,7 @@ def desenhar_hud(tela, jogo, fonte):
 def desenhar_menu(tela, estado, jogo, fontes, selecionado, capa=None):
     titulo, corpo, pequeno = fontes
     if estado == "menu" and capa is not None:
+        #Menu principal com imagem de capa 
         tela.fill((24, 22, 48))
         pygame.draw.ellipse(tela, (36, 28, 71), (288, -195, 1040, 850))
         pygame.draw.ellipse(tela, (44, 33, 82), (363, -95, 835, 675))
@@ -91,7 +97,7 @@ def desenhar_menu(tela, estado, jogo, fontes, selecionado, capa=None):
         escrever(tela, pequeno, f"Recorde  {jogo.recorde}", SUAVE, (41, 495))
         desenhar_botoes(tela, estado, corpo, selecionado, com_capa=True)
         return
-
+    #Painel padrão
     pygame.draw.rect(tela, FUNDO, (36, 52, 421, 434), border_radius=24)
     pygame.draw.rect(tela, BORDA, (36, 52, 421, 434), 1, border_radius=24)
     pygame.draw.line(tela, OURO, (64, 81), (109, 81), 3)
@@ -117,7 +123,7 @@ def desenhar_menu(tela, estado, jogo, fontes, selecionado, capa=None):
                 escrever(tela, pequeno, linha, SUAVE, (65, 174 + i * 28))
         elif estado == "pausa":
             escrever(tela, corpo, jogo.fase["nome"], SUAVE, (65, 185))
-        else:
+        else:   # vitória ou derrota
             escrever(tela, corpo, f"Pontuação final  {jogo.pontos}", OURO, (65, 188))
             escrever(tela, corpo, f"Recorde  {jogo.recorde}", SUAVE, (65, 223))
 
@@ -185,6 +191,7 @@ def main():
     relogio = pygame.time.Clock()
     capa = carregar_capa()
     sons = carregar_sons()
+    # Música de fundo
     musica = pygame.mixer.get_init() is not None
     if musica:
         pygame.mixer.music.load(str(PASTA / "assets" / "trilha.wav"))
@@ -202,6 +209,7 @@ def main():
 
     while estado != "sair":
         milissegundos = min(relogio.tick(60), 100)
+        #Entrada 
         for evento in pygame.event.get():
             acao = estado
             if evento.type == pygame.QUIT:
@@ -241,7 +249,7 @@ def main():
                         if area.collidepoint(evento.pos):
                             acao = MENUS[estado][i][1]
                             break
-
+            #transicao de estado                         
             if acao != estado:
                 if acao == "menu" and jogo is not None:
                     previa.recorde = jogo.recorde
@@ -254,7 +262,7 @@ def main():
                 estado = acao
                 if estado == "sair":
                     break
-
+        # Atualizacao 
         if estado == "sair":
             break
         if estado == "partida":
@@ -275,7 +283,7 @@ def main():
             if espera <= 0:
                 estado = "partida"
                 tempo = 0
-
+        # Desenhos
         mundo = previa if estado in ("menu", "instrucoes") else jogo
         if estado in ("menu", "instrucoes", "vitoria"):
             if estado != "menu" or capa is None:
