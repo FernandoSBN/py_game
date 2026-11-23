@@ -98,3 +98,8 @@ python main.py
 * Evite cair nos buracos entre trechos do chão, encostar no Cebolinha, colidir com caixas ou ser atingido pelas bolas rasteiras lançadas após o aviso do **Cascão**.
 * A Mônica começa com **3 vidas**. Se todas acabarem, ocorre o fim da perseguição; se alcançar o fim da última fase, o Sansão está a salvo e a partida é vencida.
 * Colete **estrelas** (`+10` pontos cada) e finalize fases (`+100` pontos cada) para bater o recorde.
+
+## Apoio de Ferramentas no Desenvolvimento
+Durante a criação do projeto, a equipe utilizou:
+* **GitHub Copilot:** auxílio geral na construção e organização dos códigos em Python/Pygame, como estrutura de estados e menus em `main.py` e organização das mecânicas e fases em `jogo.py`.
+* **ChatGPT (cálculos e desenhos):** apoio pontual em trechos com cálculos — como física de pulo/gravidade/colisão (`personagem.py`), avanço da perseguição, câmera, arco sobre buracos e escala de cenários (`jogo.py`), além de cálculos de HUD, tempo de impulso e ajuste da capa (`main.py`) — e em desenhos via código com Pygame, como os personagens (`desenhar_turma`, `desenhar_sansao`), estrelas, poderes, efeitos, cenários provisórios e cenas finais.
