@@ -124,8 +124,7 @@ class Jogo:
                 pass
 
 
-
-def distancia(self):
+    def distancia(self):
         return max(0, round(self.monica.corpo.centerx - self.cebolinha))
 
     def altura_cebolinha(self):
@@ -136,3 +135,9 @@ def distancia(self):
                 progresso = (self.cebolinha - inicio) / (fim - inicio)
                 return round(54 * math.sin(progresso * math.pi))
         return 0
+    
+    def atualizar_perseguicao(self):
+        x = self.monica.corpo.centerx
+        if self.quadro > 50:
+            self.cebolinha = max(self.cebolinha + self.fase["velocidade_cebolinha"], x - 245)
+        self.camera = max(0, min(x - 295, self.fase["largura"] - LARGURA))
