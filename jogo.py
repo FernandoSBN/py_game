@@ -6,10 +6,18 @@ import pygame
 from personagem import Personagem, desenhar_turma
 
 LARGURA, ALTURA = 960, 540
-CHAO = 444
+CHAO = 444 # coordenada Y do topo do chão
 PASTA = Path(__file__).resolve().parent
 ARQUIVO_RECORDE = PASTA / "recorde_perseguicao.txt"
-
+# Definição das fases. Todas as coordenadas são em pixels do mundo
+#   largura: comprimento total da fase
+#   velocidade_cebolinha: pixels por quadro que o Cebolinha avança  
+#   trechos: pares (início, fim) de chão,os espaços entre eles são buracos
+#   plataformas: (x, y, largura) de plataformas suspensas
+#   caixas: (x, largura) de caixas no chão (obstáculos)
+#   cascao: posições X dos Cascões que jogam bolas
+#   estrelas: (x, y) das estrelas coletáveis (10 pontos)
+#   poderes: (x, y, tipo) com tipo "escudo" ou "impulso"
 FASES = [
     {
         "nome": "Correria no Bairro do Limoeiro", "largura": 2380, "velocidade_cebolinha": 2.4,
@@ -55,11 +63,14 @@ def carregar_recorde():
       
 def carregar_fundo(nome):
     try:
+        # CORREÇÃO: convert() garante um formato compatível com smoothscale e desenha mais rápido
         imagem = pygame.image.load(str(PASTA / "assets" / nome))
     except (OSError, pygame.error):
         return None
 
     largura, altura = imagem.get_size()
+    # A imagem precisa ser um pouco mais larga que a tela
+    # e alta o bastante para cobrir a região acima do chão.
     escala = max((LARGURA + 192) / largura, CHAO / (altura * 0.91))
     return pygame.transform.smoothscale(imagem, (round(largura * escala), round(altura * escala)))
 
@@ -69,6 +80,7 @@ def desenhar_estrela(tela, x, y, raio):
     
     pontos = []
     for i in range(10):
+        # Alterna entre pontas externas (raio) e vértices internos (raio * 0,48)
         angulo = i * math.pi / 5 - math.pi / 2
         tamanho = raio if i % 2 == 0 else raio * 0.48
         pontos.append((round(x + math.cos(angulo) * tamanho),
@@ -102,8 +114,8 @@ class Jogo:
 
     def recomecar_trecho(self):
         self.monica.reposicionar()
-        self.cebolinha = 0
-        self.quadro = 0
+        self.cebolinha = 0      # posição X do Cebolinha
+        self.quadro = 0         # contador de quadros desde o início da corrida
         self.camera = 0
         self.efeitos = []
         self.cascao = {x: 0 for x in self.fase["cascao"]}
@@ -121,7 +133,7 @@ class Jogo:
             try:
                 ARQUIVO_RECORDE.write_text(str(self.recorde), encoding="utf-8")
             except OSError:
-                pass
+                pass        # sem permissão de escrita
 
 
     def distancia(self):
@@ -138,8 +150,10 @@ class Jogo:
     
     def atualizar_perseguicao(self):
         x = self.monica.corpo.centerx
+        # O Cebolinha so começa a correr após 0.8s
         if self.quadro > 50:
             self.cebolinha = max(self.cebolinha + self.fase["velocidade_cebolinha"], x - 245)
+        #camera segue a monica
         self.camera = max(0, min(x - 295, self.fase["largura"] - LARGURA))
 
 
@@ -155,6 +169,7 @@ class Jogo:
 
         for bola in self.bolas[:]:
             bola.x -= 4
+            #remove a bola quando sai do chao 
             if not any(piso.left <= bola.centerx < piso.right for piso in self.chao):
                 self.bolas.remove(bola)
 
@@ -188,7 +203,7 @@ class Jogo:
         self.atualizar_perseguicao()
         self.atualizar_cascao()
         self.coletar_itens()
-
+        #dano
         caiu = corpo.top > ALTURA
         alcancada = corpo.left <= self.cebolinha + 13
         impacto = alcancada or corpo.collidelist(self.caixas) >= 0 or corpo.collidelist(self.bolas) >= 0
@@ -207,7 +222,7 @@ class Jogo:
                 self.recomecar_trecho()
                 self.aviso_retorno = "Cebolinha te alcançou!" if alcancada else "Tente a fuga de novo!"
                 return "respawn"
-
+        #fim da fase
         if corpo.centerx >= self.final and monica.no_chao:
             self.pontuar(100)
             self.tocar("coleta")
@@ -221,7 +236,7 @@ class Jogo:
 
         self.efeitos = [efeito for efeito in self.efeitos if self.quadro - efeito[2] < 22]
         return "partida"
-
+    #desenhos
     def desenhar_fundo_provisorio(self, tela):
         parque = self.indice == 2
         if self.fase.get("interior"):
