@@ -122,3 +122,17 @@ class Jogo:
                 ARQUIVO_RECORDE.write_text(str(self.recorde), encoding="utf-8")
             except OSError:
                 pass
+
+
+
+def distancia(self):
+        return max(0, round(self.monica.corpo.centerx - self.cebolinha))
+
+    def altura_cebolinha(self):
+        for i in range(len(self.chao) - 1):
+            inicio = self.chao[i].right - 18
+            fim = self.chao[i + 1].left + 18
+            if inicio < self.cebolinha < fim:
+                progresso = (self.cebolinha - inicio) / (fim - inicio)
+                return round(54 * math.sin(progresso * math.pi))
+        return 0
