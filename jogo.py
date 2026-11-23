@@ -100,7 +100,7 @@ class Jogo:
         self.recomecar_trecho()
 
 
-        def recomecar_trecho(self):
+    def recomecar_trecho(self):
         self.monica.reposicionar()
         self.cebolinha = 0
         self.quadro = 0
@@ -110,3 +110,7 @@ class Jogo:
         self.bolas = []
         self.poderes = [(pygame.Rect(x - 12, y - 12, 24, 24), tipo)
                         for x, y, tipo in self.fase["poderes"]]
+    def tocar(self, nome):
+        som = self.sons.get(nome)
+        if som:
+            som.play()
