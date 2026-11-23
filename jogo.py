@@ -256,3 +256,29 @@ class Jogo:
                     pygame.draw.circle(tela, (67, 167 + i % 3 * 13, 126), (x + 51 + dx, 342 + dy), 34)
                 pygame.draw.ellipse(tela, (78, 174, 128), (x + 95, 404, 65, 36))
 
+    def desenhar_cenario(self, tela):
+        parque = self.indice == 2
+        interior = self.fase.get("interior")
+        if self.fundo is None:
+            self.desenhar_fundo_provisorio(tela)
+        else:
+            # Usa a largura extra da imagem ao longo da fase inteira
+            percurso = self.fase["largura"] - LARGURA
+            sobra = self.fundo.get_width() - LARGURA
+            x = -round(self.camera * sobra / percurso)
+            y = CHAO - round(self.fundo.get_height() * 0.91)
+            tela.blit(self.fundo, (x, y))
+        pygame.draw.rect(tela, (84, 148, 151), (0, CHAO, LARGURA, ALTURA - CHAO))
+
+        for piso in self.plataformas:
+            area = piso.move(-self.camera, 0)
+            base = (160, 106, 91) if parque or interior else (106, 106, 134)
+            topo = (102, 208, 110) if parque else (254, 219, 179)
+            pygame.draw.rect(tela, base, area, border_radius=4)
+            pygame.draw.rect(tela, topo, (area.x, area.y, area.w, 6), border_radius=3)
+            if piso.height > 18:
+                y = area.top + (33 if parque else 49)
+                if not parque and not interior:
+                    pygame.draw.rect(tela, (196, 180, 182), (area.x, area.top + 6, area.w, 14))
+                for x in range(area.x + 12, area.right - 17, 44):
+                    pygame.draw.line(tela, topo, (x, y), (x + 16, y), 2)
