@@ -282,3 +282,76 @@ class Jogo:
                     pygame.draw.rect(tela, (196, 180, 182), (area.x, area.top + 6, area.w, 14))
                 for x in range(area.x + 12, area.right - 17, 44):
                     pygame.draw.line(tela, topo, (x, y), (x + 16, y), 2)
+
+    def desenhar(self, tela):
+        self.desenhar_cenario(tela)
+        for caixa in self.caixas:
+            x = caixa.left - self.camera
+            for inicio in range(x, caixa.right - self.camera, 24):
+                largura = min(24, caixa.right - self.camera - inicio)
+                rect = pygame.Rect(inicio, caixa.top, largura, caixa.height)
+                pygame.draw.rect(tela, (228, 147, 81), rect, border_radius=3)
+                pygame.draw.rect(tela, (136, 78, 67), rect, 2, border_radius=3)
+                pygame.draw.line(tela, (255, 188, 105), rect.topleft, rect.bottomright, 2)
+
+        for estrela in self.estrelas:
+            y = estrela.centery + round(2 * math.sin(self.quadro / 12 + estrela.x / 50))
+            desenhar_estrela(tela, estrela.centerx - self.camera, y, 10)
+
+        for area, tipo in self.poderes:
+            x = area.centerx - self.camera
+            y = area.centery + round(3 * math.sin(self.quadro / 10))
+            cor = (74, 201, 248) if tipo == "escudo" else (255, 176, 77)
+            pygame.draw.circle(tela, (59, 53, 96), (x, y), 13)
+            pygame.draw.circle(tela, cor, (x, y), 11, 2)
+            if tipo == "escudo":
+                pygame.draw.polygon(tela, cor, [(x - 5, y - 5), (x + 5, y - 5),
+                                               (x + 4, y + 3), (x, y + 7), (x - 4, y + 3)])
+            else:
+                pygame.draw.lines(tela, cor, False, [(x + 2, y - 7), (x - 4, y + 1),
+                                                     (x + 4, y), (x - 2, y + 7)], 2)
+
+        for bola in self.bolas:
+            x, y = bola.centerx - self.camera, bola.centery
+            pygame.draw.circle(tela, (175, 84, 113), (x, y), 8)
+            pygame.draw.line(tela, (255, 207, 148), (x - 5, y + 3), (x + 5, y - 3), 2)
+
+        for posicao, lancamento in self.cascao.items():
+            x = posicao - self.camera
+            desenhar_turma(tela, x, CHAO - 38, "cascao", -1)
+            if lancamento > self.quadro:
+                pygame.draw.rect(tela, (255, 242, 190), (x + 5, CHAO - 65, 18, 18), border_radius=5)
+                pygame.draw.line(tela, (165, 63, 94), (x + 14, CHAO - 62), (x + 14, CHAO - 55), 2)
+                pygame.draw.circle(tela, (165, 63, 94), (x + 14, CHAO - 51), 1)
+
+        if self.fase.get("interior"):
+            saida = pygame.Rect(self.final - self.camera, CHAO - 75, 49, 75)
+            pygame.draw.rect(tela, (118, 73, 91), saida, border_top_left_radius=14, border_top_right_radius=14)
+            pygame.draw.rect(tela, (104, 198, 141), saida.inflate(-10, -10), border_radius=8)
+            pygame.draw.polygon(tela, (255, 245, 207), [
+                (saida.left + 13, saida.centery - 5), (saida.right - 11, saida.centery),
+                (saida.left + 13, saida.centery + 5),
+            ])
+
+        else:
+            x = self.final - self.camera
+            pygame.draw.line(tela, (67, 61, 111), (x, CHAO), (x, CHAO - 68), 4)
+            pygame.draw.polygon(tela, (255, 218, 81), [
+                (x, CHAO - 68), (x + 38, CHAO - 56), (x, CHAO - 45),
+            ])
+
+        x = round(self.cebolinha) - self.camera
+        passo = round(4 * math.sin(self.quadro / 4)) if self.quadro > 50 else 0
+        base = CHAO - self.altura_cebolinha()
+        desenhar_turma(tela, x - 14, base - 38, "cebolinha", 1, passo)
+        pygame.draw.polygon(tela, (172, 65, 111), [(x - 6, base - 58), (x + 6, base - 58),
+                                                 (x, base - 52)])
+        self.monica.desenhar(tela, self.camera)
+
+        for (x, y), cor, inicio in self.efeitos:
+            idade = self.quadro - inicio
+            for i in range(7):
+                angulo = i * math.tau / 7
+                raio = 5 + idade * 1.55
+                pygame.draw.circle(tela, cor, (round(x - self.camera + raio * math.cos(angulo)),
+                                               round(y + raio * math.sin(angulo))), 2)
