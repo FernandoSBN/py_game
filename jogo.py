@@ -178,3 +178,46 @@ class Jogo:
                     monica.impulso = 360
                 self.efeitos.append((area.center, (96, 218, 247), self.quadro))
                 self.tocar("coleta")
+    def atualizar(self, eixo, pular):
+        self.quadro += 1
+        monica = self.monica
+        corpo = monica.corpo
+        if monica.mover(eixo, pular, self.plataformas):
+            self.tocar("salto")
+        corpo.right = min(corpo.right, self.fase["largura"])
+        self.atualizar_perseguicao()
+        self.atualizar_cascao()
+        self.coletar_itens()
+
+        caiu = corpo.top > ALTURA
+        alcancada = corpo.left <= self.cebolinha + 13
+        impacto = alcancada or corpo.collidelist(self.caixas) >= 0 or corpo.collidelist(self.bolas) >= 0
+        if caiu or (impacto and not monica.imunidade):
+            self.tocar("dano")
+            if monica.escudo and not caiu:
+                monica.escudo = False
+                monica.imunidade = 90
+                monica.atordoada = 18
+                if alcancada:
+                    self.cebolinha = corpo.left - 160
+            else:
+                monica.vidas -= 1
+                if monica.vidas == 0:
+                    return "derrota"
+                self.recomecar_trecho()
+                self.aviso_retorno = "Cebolinha te alcançou!" if alcancada else "Tente a fuga de novo!"
+                return "respawn"
+
+        if corpo.centerx >= self.final and monica.no_chao:
+            self.pontuar(100)
+            self.tocar("coleta")
+            if self.indice == len(FASES) - 1:
+                return "vitoria"
+            self.aviso_transicao = ("Mônica fugiu pelo quintal!" if self.fase.get("interior")
+                                    else "Mônica entrou na casa do Cascão!")
+            self.indice += 1
+            self.carregar_fase()
+            return "transicao"
+
+        self.efeitos = [efeito for efeito in self.efeitos if self.quadro - efeito[2] < 22]
+        return "partida"
