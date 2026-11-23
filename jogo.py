@@ -114,3 +114,11 @@ class Jogo:
         som = self.sons.get(nome)
         if som:
             som.play()
+    def pontuar(self, pontos):
+        self.pontos += pontos
+        if self.pontos > self.recorde:
+            self.recorde = self.pontos
+            try:
+                ARQUIVO_RECORDE.write_text(str(self.recorde), encoding="utf-8")
+            except OSError:
+                pass
