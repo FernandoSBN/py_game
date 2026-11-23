@@ -52,10 +52,7 @@ def carregar_recorde():
         return max(0, int(ARQUIVO_RECORDE.read_text(encoding="utf-8")))
     except (OSError, ValueError):
         return 0
-
-
-        def carregar_fundo(nome):
-   
+      
 def carregar_fundo(nome):
     try:
         imagem = pygame.image.load(str(PASTA / "assets" / nome))
@@ -65,3 +62,55 @@ def carregar_fundo(nome):
     largura, altura = imagem.get_size()
     escala = max((LARGURA + 192) / largura, CHAO / (altura * 0.91))
     return pygame.transform.smoothscale(imagem, (round(largura * escala), round(altura * escala)))
+
+
+
+def desenhar_estrela(tela, x, y, raio):
+    
+    pontos = []
+    for i in range(10):
+        angulo = i * math.pi / 5 - math.pi / 2
+        tamanho = raio if i % 2 == 0 else raio * 0.48
+        pontos.append((round(x + math.cos(angulo) * tamanho),
+                       round(y + math.sin(angulo) * tamanho)))
+    pygame.draw.polygon(tela, (255, 218, 81), pontos)
+    pygame.draw.polygon(tela, (180, 104, 52), pontos, 1)
+
+class Jogo:
+
+    def __init__(self, sons):
+        self.sons = sons
+        self.monica = Personagem()
+        self.pontos = 0
+        self.recorde = carregar_recorde()
+        self.indice = 0
+        self.carregar_fase()
+
+    def carregar_fase(self):
+        """Monta a fase e repõe os itens da nova área."""
+        self.fase = FASES[self.indice]
+        self.fundo = carregar_fundo(self.fase["fundo"])
+        self.chao = [pygame.Rect(a, CHAO, b - a, ALTURA - CHAO) for a, b in self.fase["trechos"]]
+        self.plataformas = self.chao + [pygame.Rect(x, y, largura, 18)
+                                        for x, y, largura in self.fase["plataformas"]]
+        self.caixas = [pygame.Rect(x, CHAO - 18, largura, 18)
+                       for x, largura in self.fase["caixas"]]
+        self.estrelas = [pygame.Rect(x - 10, y - 10, 20, 20) for x, y in self.fase["estrelas"]]
+        self.final = self.fase["largura"] - 130
+        self.recomecar_trecho()
+
+
+    def recomecar_trecho(self):
+        self.monica.reposicionar()
+        self.cebolinha = 0
+        self.quadro = 0
+        self.camera = 0
+        self.efeitos = []
+        self.cascao = {x: 0 for x in self.fase["cascao"]}
+        self.bolas = []
+        self.poderes = [(pygame.Rect(x - 12, y - 12, 24, 24), tipo)
+                        for x, y, tipo in self.fase["poderes"]]
+    def tocar(self, nome):
+        som = self.sons.get(nome)
+        if som:
+            som.play()
