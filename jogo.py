@@ -75,3 +75,26 @@ def desenhar_estrela(tela, x, y, raio):
                        round(y + math.sin(angulo) * tamanho)))
     pygame.draw.polygon(tela, (255, 218, 81), pontos)
     pygame.draw.polygon(tela, (180, 104, 52), pontos, 1)
+
+class Jogo:
+
+    def __init__(self, sons):
+        self.sons = sons
+        self.monica = Personagem()
+        self.pontos = 0
+        self.recorde = carregar_recorde()
+        self.indice = 0
+        self.carregar_fase()
+
+    def carregar_fase(self):
+        """Monta a fase e repõe os itens da nova área."""
+        self.fase = FASES[self.indice]
+        self.fundo = carregar_fundo(self.fase["fundo"])
+        self.chao = [pygame.Rect(a, CHAO, b - a, ALTURA - CHAO) for a, b in self.fase["trechos"]]
+        self.plataformas = self.chao + [pygame.Rect(x, y, largura, 18)
+                                        for x, y, largura in self.fase["plataformas"]]
+        self.caixas = [pygame.Rect(x, CHAO - 18, largura, 18)
+                       for x, largura in self.fase["caixas"]]
+        self.estrelas = [pygame.Rect(x - 10, y - 10, 20, 20) for x, y in self.fase["estrelas"]]
+        self.final = self.fase["largura"] - 130
+        self.recomecar_trecho()
