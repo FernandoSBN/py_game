@@ -141,3 +141,19 @@ class Jogo:
         if self.quadro > 50:
             self.cebolinha = max(self.cebolinha + self.fase["velocidade_cebolinha"], x - 245)
         self.camera = max(0, min(x - 295, self.fase["largura"] - LARGURA))
+
+
+
+    def atualizar_cascao(self):
+        for x, lancamento in self.cascao.items():
+            distancia = x - self.monica.corpo.centerx
+            if lancamento == 0 and 0 < distancia < 210:
+                self.cascao[x] = self.quadro + 28
+            elif lancamento == self.quadro:
+                self.bolas.append(pygame.Rect(x - 19, CHAO - 16, 16, 16))
+                self.cascao[x] = -1
+
+        for bola in self.bolas[:]:
+            bola.x -= 4
+            if not any(piso.left <= bola.centerx < piso.right for piso in self.chao):
+                self.bolas.remove(bola)
