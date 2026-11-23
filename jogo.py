@@ -98,3 +98,15 @@ class Jogo:
         self.estrelas = [pygame.Rect(x - 10, y - 10, 20, 20) for x, y in self.fase["estrelas"]]
         self.final = self.fase["largura"] - 130
         self.recomecar_trecho()
+
+
+        def recomecar_trecho(self):
+        self.monica.reposicionar()
+        self.cebolinha = 0
+        self.quadro = 0
+        self.camera = 0
+        self.efeitos = []
+        self.cascao = {x: 0 for x in self.fase["cascao"]}
+        self.bolas = []
+        self.poderes = [(pygame.Rect(x - 12, y - 12, 24, 24), tipo)
+                        for x, y, tipo in self.fase["poderes"]]
