@@ -221,3 +221,38 @@ class Jogo:
 
         self.efeitos = [efeito for efeito in self.efeitos if self.quadro - efeito[2] < 22]
         return "partida"
+
+    def desenhar_fundo_provisorio(self, tela):
+        parque = self.indice == 2
+        if self.fase.get("interior"):
+            tela.fill((238, 188, 171))
+            for x in range(-self.camera % 210 - 210, LARGURA, 210):
+                pygame.draw.rect(tela, (160, 106, 91), (x, 175, 85, 106), border_radius=7)
+                pygame.draw.rect(tela, (254, 230, 186), (x + 7, 182, 71, 92), border_radius=4)
+            pygame.draw.rect(tela, (184, 126, 102), (0, 421, LARGURA, 23))
+            return
+        ceu = (146, 222, 236) if parque else (140, 211, 251)
+        tela.fill(ceu)
+        pygame.draw.circle(tela, (255, 229, 142), (769 - self.camera // 22, 145), 45)
+        for i in range(8):
+            x = i * 213 - self.camera // 5 - 186
+            y = 125 + (i * 27) % 106
+            pygame.draw.ellipse(tela, (239, 250, 252), (x, y, 124, 27))
+            pygame.draw.ellipse(tela, (239, 250, 252), (x + 28, y - 15, 62, 36))
+        for i in range(11):
+            x = i * 188 - self.camera // 3 - 155
+            pygame.draw.ellipse(tela, (119, 207, 170), (x, 302 - i % 3 * 19, 270, 201))
+            if not parque and i % 3 != 0:
+                cor = [(247, 172, 127), (254, 214, 131), (224, 177, 223)][i % 3]
+                y = 308 - i % 2 * 32
+                pygame.draw.rect(tela, cor, (x, y, 120, CHAO - y))
+                pygame.draw.polygon(tela, (177, 88, 108), [(x - 12, y), (x + 58, y - 49), (x + 132, y)])
+                pygame.draw.rect(tela, (119, 93, 143), (x + 71, CHAO - 65, 29, 65), border_radius=5)
+                pygame.draw.rect(tela, (236, 248, 249), (x + 19, y + 29, 34, 31), border_radius=3)
+                pygame.draw.line(tela, (105, 155, 170), (x + 36, y + 29), (x + 36, y + 59), 2)
+            else:
+                pygame.draw.rect(tela, (145, 104, 84), (x + 66, 355, 14, 89), border_radius=5)
+                for dx, dy in ((0, 9), (24, -27), (43, 3)):
+                    pygame.draw.circle(tela, (67, 167 + i % 3 * 13, 126), (x + 51 + dx, 342 + dy), 34)
+                pygame.draw.ellipse(tela, (78, 174, 128), (x + 95, 404, 65, 36))
+
