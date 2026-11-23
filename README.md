@@ -100,7 +100,6 @@ python main.py
 * Colete **estrelas** (`+10` pontos cada) e finalize fases (`+100` pontos cada) para bater o recorde.
 
 ## Apoio de Ferramentas no Desenvolvimento
-
 Durante a criação do projeto, a equipe utilizou:
 * **GitHub Copilot:** auxílio geral na construção e organização dos códigos em Python/Pygame, como estrutura de estados e menus em `main.py` e organização das mecânicas e fases em `jogo.py`.
-* **ChatGPT (apenas cálculos e desenhos):** apoio pontual em trechos com cálculos — como física de pulo/gravidade/colisão (`personagem.py`), avanço da perseguição, câmera, arco sobre buracos e escala de cenários (`jogo.py`), além de cálculos de HUD, tempo de impulso e ajuste da capa (`main.py`) — e em desenhos via código com Pygame, como os personagens (`desenhar_turma`, `desenhar_sansao`), estrelas, poderes, efeitos, cenários provisórios e cenas finais.
+* **ChatGPT (cálculos e desenhos):** apoio pontual em trechos com cálculos — como física de pulo/gravidade/colisão (`personagem.py`), avanço da perseguição, câmera, arco sobre buracos e escala de cenários (`jogo.py`), além de cálculos de HUD, tempo de impulso e ajuste da capa (`main.py`) — e em desenhos via código com Pygame, como os personagens (`desenhar_turma`, `desenhar_sansao`), estrelas, poderes, efeitos, cenários provisórios e cenas finais.
