@@ -79,7 +79,7 @@ class Personagem:
         desenhar_sansao(tela, x + (19 if self.direcao > 0 else -8), y + 15 + abs(passo) // 2)
 
 def desenhar_sansao(tela, x, y):
-    """Desenha o coelho azul que passa de um personagem para o outro."""
+    # Desenha o coelho azul que passa de um personagem para o outro
     azul = (71, 165, 237)
     pygame.draw.ellipse(tela, azul, (x + 1, y, 5, 12))      #orelha esquerda
     pygame.draw.ellipse(tela, azul, (x + 9, y - 2, 5, 13))  #orelha direita
@@ -89,7 +89,7 @@ def desenhar_sansao(tela, x, y):
         pygame.draw.circle(tela, (29, 41, 82), (x + olho, y + 12), 1)
 
 def desenhar_turma(tela, x, y, nome, direcao=1, passo=0):
-    """Identifica cada personagem pela roupa e pela silhueta."""
+    # Identifica cada personagem pela roupa e pela silhueta
     contorno = (44, 35, 64)
     pele = (255, 204, 152)
     cores = {"monica": (235, 64, 93), "cebolinha": (67, 177, 100), "cascao": (249, 197, 68)}
